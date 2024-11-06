@@ -1,0 +1,42 @@
+using gold.**
+
+procedure main(args:String[]) begin
+	GAutomataFrame.show(createAutomaton())
+	Utilities.test(createAutomaton())
+end  
+function getName() begin
+	return "Contador Módulo 3"
+end
+/*
+ *  Strings of {a,b,c} 
+ * Even number of a’s
+*c cannot appear in positions that are multiples of 3.
+*No two consecutive b’s
+ * 
+ */
+ 
+
+function createAutomaton():IAutomaton begin
+	Q:=(0‥1)×{i|0≤i<3}×(0‥1) ∪ {0,1} ∪ {'e'}
+	Σ:={'a','b','c','0','1','e'}
+	q₀:= ⟨0,1,0⟩
+	F:={1}
+	 
+	 return 	GDeterministicAutomaton(Q,Σ,q₀,F,δ)
+end
+function δ(q,s) begin  // error state
+	if q = 1 then return 'e'
+	elseif q = 'e' then return 'e'
+ 	else return q
+ 	end
+end
+
+function δ(⟨a,pos,b⟩,s) begin	
+	if s = 'a'  then return ⟨(a+1)%2,(pos+1)%3,b⟩
+	elseif s='c' and pos ≠ 0  then return ⟨a,(pos+1)%3,b⟩
+	elseif s='b' then return ⟨a,(pos+1)%3,(b+1)%2⟩
+	elseif s = '0' and a = b then return 1
+	elseif s = '1' and a≠b then return 1
+	else return 'e'	
+	end
+end

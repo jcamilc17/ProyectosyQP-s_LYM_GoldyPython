@@ -1,0 +1,58 @@
+using gold.**
+// -----------------------
+// Silvia Takahashi
+// UNIVERSIDAD DE LOS ANDES
+//------------------------------
+// 
+//  
+//  
+//  
+//  
+
+var  Alph 
+
+procedure main(args:String[]) begin
+ 	    
+ 	  
+  
+	
+	
+	
+	coder:=createTransducer(Alph)
+	print "Input strings of a,b,c"
+			
+	GAutomataFrame.show(coder)
+	Utilities.test(coder)
+end
+
+
+
+
+function createTransducer(A):ITransducer begin
+	Q := (0‥1)×(0‥1)×(0‥1)
+	Σ:= ('a'‥'c')
+	O := ('0'‥'7')
+	q₀:=⟨0,0,0⟩
+	F:=Q 
+	return GDeterministicTransducer(Q,Σ,O,q₀,F,δ,g,h)
+end
+
+
+
+ g(⟨ays,bes,ces⟩):=  (ays*4 + bes*2 + ces)
+
+
+function δ(⟨ays,bes,ces⟩,σ) begin
+   if  σ='a'  then return ⟨(ays+1)%2,bes,ces⟩
+   elseif  σ='b'  then return ⟨ays,(bes+1)%2,ces⟩
+   else return ⟨ays,bes, (ces+1)%2⟩
+   	
+end
+end
+  
+function h(q,σ) begin
+    return λ
+end
+
+
+ 
