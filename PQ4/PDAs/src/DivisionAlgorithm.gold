@@ -1,0 +1,113 @@
+// -----------------------
+// Silvia Takahashi
+// UNIVERSIDAD DE LOS ANDES
+//------------------------------
+// 
+//  
+//  Recognizes division algorithm for d in {2,3,4,5}  
+//
+
+using gold.structures.automaton.*
+using gold.visualization.automaton.*
+procedure main(args:String[]) begin
+	GAutomataFrame.show(createAutomaton())
+end
+function createAutomaton():IPushdownAutomaton begin
+	Σ:= {'2','0','3','4','5','x','q','r','=','+','*'}
+	 
+	Q:=  {0,1,2}∪{"D2","D3","D4","D5"}∪{"Q2","Q3","Q4","Q5"}∪{"R1","R2","R3","R4"}∪{"Z2","Z3","Z4","Z5","F"} 
+	
+	Γ:= {'x','$'}
+	q₀:=0
+	F:={"F"}
+	M:=GPushdownAutomaton(Q,Σ,Γ,q₀,F)
+	
+	//Push x's:
+	M.delta(0, 1, "").push("$")
+    M.delta(1, 2, "x").push("x")
+    M.delta(2,2,"x").push("x")
+    
+    //@d=2 case:
+    M.delta(2,"D2","=2*").ignore()
+    
+    //2 > x:
+    M.delta("D2","Z2","0").ignore()
+    M.delta("Z2","R1","+r").pop("x")
+    
+    //2*q
+    M.delta("D2","Q2","q").pop("xx")
+    M.delta("Q2","Q2","q").pop("xx")
+    
+    //+r
+    M.delta("Q2","R1","+r").pop("x")
+    M.delta("R1","F","").pop("$")
+    
+    M.delta("Q2","F","").pop("$")
+    
+    //@d=3 case:
+    M.delta(2,"D3","=3*").ignore()
+    
+    //3 > x:
+    M.delta("D3","Z3","0").ignore()
+    M.delta("Z3","R1","+r").pop("x")
+    M.delta("Z3","R2","+rr").pop("xx")
+    
+    //3*q:
+    M.delta("D3","Q3","q").pop("xxx")
+    M.delta("Q3","Q3","q").pop("xxx")
+    
+    //+r:
+    M.delta("Q3","R1","+r").pop("x")
+    M.delta("Q3","R2","+rr").pop("xx")
+    M.delta("R2","F","").pop("$")
+    
+    M.delta("Q3","F","").pop("$")
+    
+    //@d = 4 case:
+    M.delta(2,"D4","=4*").ignore()
+    
+    //4 > x:
+    M.delta("D4","Z4","0").ignore()
+    M.delta("Z4","R1","+r").pop("x")
+    M.delta("Z4","R2","+rr").pop("xx")
+    M.delta("Z4","R3","+rrr").pop("xxx")
+    
+    //4*q:
+    M.delta("D4","Q4","q").pop("xxxx")
+    M.delta("Q4","Q4","q").pop("xxxx")
+    
+    //+r:
+    M.delta("Q4","R1","+r").pop("x")
+    M.delta("Q4","R2","+rr").pop("xx")
+    M.delta("Q4","R3","+rrr").pop("xxx")
+    M.delta("R3","F","").pop("$")
+    
+    M.delta("Q4","F","").pop("$")
+    
+    //@d = 5 case:
+    M.delta(2,"D5","=5*").ignore()
+    
+    //5 > x:
+    M.delta("D5","Z5","0").ignore()
+    M.delta("Z5","R1","+r").pop("x")
+    M.delta("Z5","R2","+rr").pop("xx")
+    M.delta("Z5","R3","+rrr").pop("xxx")
+    M.delta("Z5","R4","+rrrr").pop("xxxx")
+    
+    //5*q:
+    M.delta("D5","Q5","q").pop("xxxxx")
+    M.delta("Q5","Q5","q").pop("xxxxx")
+    
+    //+r:
+    M.delta("Q5","R1","+r").pop("x")
+    M.delta("Q5","R2","+rr").pop("xx")
+    M.delta("Q5","R3","+rrr").pop("xxx")
+    M.delta("Q5","R4","+rrrr").pop("xxxx")
+    M.delta("R4","F","").pop("$")
+    
+    M.delta("Q5","F","").pop("$")
+    
+	return M
+end
+
+
