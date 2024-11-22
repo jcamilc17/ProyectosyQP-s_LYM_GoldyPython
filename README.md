@@ -1,2 +1,2 @@
-#Importante 🚩🚩🚩:
+# Importante 🚩🚩🚩:
 Para la mayoría de archivos del Repositorio toca tener [Java 8](https://www.oracle.com/java/technologies/downloads/?er=221886) e instalar GOLD ([versión MAC](https://github.com/FLAGlab/gold-mac.git), [versión Windows](https://github.com/silviaTak/GoldKeplerWindows.git)). Para el PQ5 toca utilizar la aplicación jar de [simulación de máquinas de Turing](./Gold_TuringMachine_Simulator).
