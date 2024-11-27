@@ -1,0 +1,158 @@
+using gold.**
+
+toSet(C) :=  {x|  x in C}
+
+///=== mini Parser ===
+
+
+	
+
+function createParser(A):IPushdownAutomaton begin
+	Q:={0,1,2,3}∪{"CM","RT","CD"}∪{"Ms"}∪{"NW"} // (CM = Commands, RT = Repeat Times, CD = Conditionals, Ms = moves(), NW = NEW VAR/MACRO
+	
+	Σ:=toSet(A)  ∪ {' ', '\n'}
+	
+	Γ:={'1','$','3','⍷','∏','∀','∑','ボ','ɛ','ℂ','⊕','@','∆','M'}
+	q₀:=0
+	F:= {2}
+	M:=GPushdownAutomaton(Q,Σ,Γ,q₀,F)
+	
+SkipChars := {' ', '\n'}   // this will only  be used when testing only the parser as the lexer removes  SkipChars
+	// transition for open and close  parenthesis as top level commands. You may use others for blocks
+	
+	M.delta(0,1,"X{").push("1") // EXEC {
+	
+	// #Commands:
+	M.delta(1,"CM","d(#)").ignore()  // drop  (number) 
+	M.delta(1,"CM","d(v)").ignore() // drop (variable)	
+   M.delta(1,"CM","j(v)").ignore()  // jump (variable)
+   M.delta(1,"CM", "j(#)").ignore() // jump (number)
+   M.delta(1,"CM","w(v)").ignore() // walk(variable)
+   M.delta(1,"CM","w(#)").ignore() // walk(number)  
+   M.delta(1,"CM","p(v)").ignore() // pick(variable)
+   M.delta(1,"CM","p(#)").ignore() // pick(number)  
+   M.delta(1,"CM","g(v)").ignore() // grab(variable)
+   M.delta(1,"CM","g(#)").ignore() // grab(number)
+   M.delta(1,"CM","K(v)").ignore() // pop(variable)
+   M.delta(1,"CM","K(#)").ignore() // pop (number)
+   M.delta(1,"CM","L(v)").ignore() // letGo(variable)
+   M.delta(1,"CM","L(#)").ignore() // letGo(number)
+   M.delta(1,"CM","Y").ignore() // nop
+   M.delta(1,1,"S(").push("$") // safeExe()
+   M.delta(1,3,"v(").push("M") // MACRO Invocation
+   M.delta(3,3,"v").ignore()
+   M.delta(3,3,"#").ignore()
+   M.delta(3,3,",").ignore()
+   M.delta(3,"CM",")").pop("M") // End MACRO Invocation
+   
+   // Continuation EXEC:
+   M.delta("CM",1,";").ignore()
+   // End safeExe:
+   M.delta("CM",1,");").pop("$")
+   
+   
+   // #moves() Command Structure:
+   M.delta(1,"Ms","m(").push("3") // moves()
+   // List of Directions (left, right, forward, backward):
+   M.delta("Ms","Ms","l,").ignore()
+   M.delta("Ms","Ms","r,").ignore()
+   M.delta("Ms","Ms","f,").ignore()
+   M.delta("Ms","Ms","B,").ignore()
+   // End of List (same directions):
+   M.delta("Ms",1,"l);").pop("3")
+   M.delta("Ms",1,"r);").pop("3")
+   M.delta("Ms",1,"f);").pop("3")
+   M.delta("Ms",1,"B);").pop("3")
+   
+   // #turnToThe() Command:
+   M.delta(1,1,"T(n);").ignore()  // turnToThe(north)
+   M.delta(1,1,"T(s);").ignore() // turnToThe(south)
+   M.delta(1,1,"T(e);").ignore() // turnToThe(east)
+   M.delta(1,1, "T(w);").ignore() // turnToThe(west)
+   
+   // #turnToMy() Command:
+   M.delta(1,1,"t(r);").ignore()  // turnToMy(right)
+   M.delta(1,1,"t(l);").ignore() // turnToMy(left)
+   M.delta(1,1,"t(b);").ignore() // turnToMy(back)
+  
+  // #*End EXEC and MACRO:
+   M.delta(1,2,"}").pop("1")//  return
+   
+   //# NEW VAR:
+   M.delta(0,"NW","NV").push("∏") 
+   M.delta("NW","NW","v=").ignore()
+   M.delta("NW",2,"#").pop("∏")
+  
+  // #NEW MACRO:
+   M.delta(0,"NW","NM").push("1") 
+   M.delta("NW","NW","v(").push("∀")
+   M.delta("NW","NW","v").ignore()
+   M.delta("NW","NW","#").ignore()
+   M.delta("NW","NW",",").ignore()
+   M.delta("NW","NW",")").pop("∀")
+   // {Commands} (inside MACRO's):
+   M.delta("NW",1,"{").ignore()
+   
+   //#Control Structures (Rep Times):
+   M.delta(1,"RT","R").push("∑")
+   M.delta("RT","RT","vx").ignore()
+   M.delta("RT","RT","#x").ignore()
+   M.delta("RT",1,"{").pop("∑")
+   //End Rep times:
+   M.delta(1,1,"}U;").ignore()
+   
+   //#isBlocked?() (Be it right, left, front, back):
+   M.delta("CD","CD","B(").push("ɛ")
+   M.delta("CD","CD","r)").pop("ɛ")
+   M.delta("CD","CD","l)").pop("ɛ")
+   M.delta("CD","CD","F)").pop("ɛ")
+   M.delta("CD","CD","b)").pop("ɛ")
+   
+   //#isFacing?() (Be it north, south, east, west):
+   M.delta("CD","CD","C(").push("⊕")
+   M.delta("CD","CD","n)").pop("⊕")
+   M.delta("CD","CD","s)").pop("⊕")
+   M.delta("CD","CD","e)").pop("⊕")
+   M.delta("CD","CD","w)").pop("⊕")
+   
+   //#zero?():
+   M.delta("CD","CD","z(").push("ℂ")
+   M.delta("CD","CD","v)").pop("ℂ")
+   
+   //#not():
+   M.delta("CD","CD","-(").push("@")
+   M.delta("CD","CD",")").pop("@")
+   
+   // #Control Structures if (‥.)then{‥} else{‥.}fi:
+   M.delta(1,"CD","i(").push("ボ")
+   M.delta("CD",1,")>{").ignore()
+   // End Block1 and Start Block2:
+   M.delta(1,1,"}E{").ignore()
+   // End Block2:
+   M.delta(1,"CD","}Z").pop("ボ")
+   
+   // #Control Structures do(‥) {‥}od:
+   M.delta(1,"CD","D(").push("∆")
+   // Open do Block:
+   M.delta("CD",1,"){").ignore()
+   // End Block do:
+   M.delta(1,"CD","}G").pop("∆")
+   
+   //End Conditional (if & do):
+   M.delta("CD",1,";").ignore()
+   
+   // #Continuation Program:
+   M.delta(2,1,"X{").push("1")
+   M.delta(2,"NW","NV").push("∏")
+   M.delta(2,"NW","NM").push("1")
+   
+ for each q in Q do
+ 	for each s in SkipChars do
+ 	   M.delta(q,q,λ+s).ignore()
+ end
+ end
+
+
+return M
+end
+
