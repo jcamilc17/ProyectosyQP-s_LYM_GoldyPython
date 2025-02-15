@@ -1,2 +1,3 @@
 # Importante 🚩🚩🚩:
 Para la mayoría de archivos del Repositorio toca tener [Java 8](https://www.oracle.com/java/technologies/downloads/?er=221886) e instalar GOLD ([versión MAC](https://github.com/FLAGlab/gold-mac.git), [versión Windows](https://github.com/silviaTak/GoldKeplerWindows.git)). Para el PQ5 toca utilizar la aplicación jar de [simulación de máquinas de Turing](./Gold_TuringMachine_Simulator).
+Para la instalacion en windows del simulador para el PQ6 de petrinets se puede usar esta [Petri-Simulación](https://github.com/Uzuul23/HOldPetriSim/releases) y para MAC primero toca descargar este [emulador de windows](https://www.playonmac.com/en/#google_vignette).
